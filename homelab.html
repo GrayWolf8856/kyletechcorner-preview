@@ -1,0 +1,208 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta name="robots" content="noindex,nofollow">
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Inside the Home Lab — Kyle Tech Corner</title>
+<meta name="description" content="A breakdown of the Kyle Tech Corner self-hosted home lab: weather alerting, push + SMS notifications, a dead-man's-switch watchdog, and a live dashboard.">
+<link rel="stylesheet" href="style.css">
+<style>
+  .diagram-card{background:#fff;border:1px solid var(--line);border-radius:14px;padding:18px;margin:24px 0;overflow-x:auto}
+  .legend-row{display:flex;flex-wrap:wrap;gap:18px;font-size:.85rem;color:var(--ink-soft);margin-top:6px}
+  .legend-row span{display:inline-flex;align-items:center;gap:7px}
+  .legend-row i{width:18px;height:3px;border-radius:2px;display:inline-block}
+</style>
+</head>
+<body>
+
+<header class="site">
+  <div class="wrap nav">
+    <a class="brand" href="index.html"><span class="logo">KT</span>Kyle&nbsp;Tech&nbsp;<span class="tag">Corner</span></a>
+    <nav class="links">
+      <a href="index.html">Home</a>
+      <a href="about.html">About</a>
+      <a href="homelab.html">Homelab</a>
+      <a class="yt" href="https://www.youtube.com/@KyleTechCorner" target="_blank" rel="noopener">YouTube</a>
+    </nav>
+  </div>
+</header>
+
+<div class="page">
+  <div class="wrap prose" style="max-width:820px">
+    <span class="tag-pill">Project Breakdown</span>
+    <h1>Inside the Home Lab</h1>
+    <p class="lede">The lab runs a small, always-on Mac mini that does real work: it watches the
+    weather, keeps an eye on itself, and pushes alerts to my phone — all with free, open APIs and
+    a few hundred lines of plain scripts. Here's the whole system on one page.</p>
+
+    <div class="diagram-card">
+      <svg width="100%" viewBox="0 0 680 600" role="img" xmlns="http://www.w3.org/2000/svg" style="min-width:640px">
+        <title>Home lab alerting architecture</title>
+        <desc>A Mac mini runs five scheduled jobs that pull weather data and push alerts out through SMS, push notifications, and a dead-man's-switch watchdog.</desc>
+        <defs>
+          <marker id="ab" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse"><path d="M2 1L8 5L2 9" fill="none" stroke="#0891b2" stroke-width="1.7"/></marker>
+          <marker id="ag" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse"><path d="M2 1L8 5L2 9" fill="none" stroke="#059669" stroke-width="1.7"/></marker>
+          <marker id="aw" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse"><path d="M2 1L8 5L2 9" fill="none" stroke="#d97706" stroke-width="1.7"/></marker>
+          <marker id="ar" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse"><path d="M2 1L8 5L2 9" fill="none" stroke="#dc2626" stroke-width="1.7"/></marker>
+          <marker id="agr" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse"><path d="M2 1L8 5L2 9" fill="none" stroke="#94a3b8" stroke-width="1.7"/></marker>
+        </defs>
+
+        <!-- Row A: data sources -->
+        <rect x="16" y="34" width="200" height="46" rx="8" fill="#fff" stroke="#cbd5e1"/>
+        <text x="116" y="56" text-anchor="middle" font-size="13.5" font-weight="600" fill="#0f172a">NWS · weather.gov</text>
+        <text x="116" y="72" text-anchor="middle" font-size="11" fill="#475569">live forecast + alerts</text>
+
+        <rect x="464" y="34" width="200" height="46" rx="8" fill="#fff" stroke="#cbd5e1"/>
+        <text x="564" y="56" text-anchor="middle" font-size="13.5" font-weight="600" fill="#0f172a">RainViewer</text>
+        <text x="564" y="72" text-anchor="middle" font-size="11" fill="#475569">live radar tiles</text>
+
+        <line x1="116" y1="80" x2="116" y2="111" stroke="#0891b2" stroke-width="1.7" marker-end="url(#ab)"/>
+        <line x1="564" y1="80" x2="564" y2="111" stroke="#0891b2" stroke-width="1.7" marker-end="url(#ab)"/>
+
+        <!-- Mac mini -->
+        <rect x="16" y="114" width="648" height="242" rx="12" fill="#f8fafc" stroke="#94a3b8" stroke-width="1.5"/>
+        <text x="32" y="137" font-size="14.5" font-weight="600" fill="#0f172a">🖥  Mac mini (the home server)</text>
+        <text x="32" y="155" font-size="11" fill="#475569">5 automated jobs, scheduled and always-on</text>
+
+        <rect x="32" y="168" width="300" height="38" rx="6" fill="#fff" stroke="#e2e8f0"/>
+        <text x="44" y="185" font-size="12" font-family="ui-monospace,monospace" fill="#0f172a">weather_truck_alert</text>
+        <text x="44" y="199" font-size="10.5" fill="#475569">every 5 min · storm + hail alerts</text>
+
+        <rect x="32" y="214" width="300" height="38" rx="6" fill="#fff" stroke="#e2e8f0"/>
+        <text x="44" y="231" font-size="12" font-family="ui-monospace,monospace" fill="#0f172a">weather_briefing</text>
+        <text x="44" y="245" font-size="10.5" fill="#475569">daily 7 AM forecast → push</text>
+
+        <rect x="32" y="260" width="300" height="38" rx="6" fill="#fff" stroke="#e2e8f0"/>
+        <text x="44" y="277" font-size="12" font-family="ui-monospace,monospace" fill="#0f172a">balance_check</text>
+        <text x="44" y="291" font-size="10.5" fill="#475569">daily · low-funds → push</text>
+
+        <rect x="348" y="168" width="300" height="38" rx="6" fill="#fff" stroke="#e2e8f0"/>
+        <text x="360" y="185" font-size="12" font-family="ui-monospace,monospace" fill="#0f172a">heartbeat</text>
+        <text x="360" y="199" font-size="10.5" fill="#475569">every 5 min · "I'm alive" ping</text>
+
+        <rect x="348" y="214" width="300" height="38" rx="6" fill="#fff" stroke="#e2e8f0"/>
+        <text x="360" y="231" font-size="12" font-family="ui-monospace,monospace" fill="#0f172a">dashboard</text>
+        <text x="360" y="245" font-size="10.5" fill="#475569">status · settings · radar map</text>
+
+        <rect x="348" y="260" width="300" height="38" rx="6" fill="#fff" stroke="#e2e8f0"/>
+        <text x="360" y="277" font-size="12" font-family="ui-monospace,monospace" fill="#0f172a">notify + sms helpers</text>
+        <text x="360" y="291" font-size="10.5" fill="#475569">push + SMS senders</text>
+
+        <text x="340" y="334" text-anchor="middle" font-size="10.5" fill="#94a3b8">open APIs · plain scripts · no cloud server needed</text>
+
+        <!-- mini out -->
+        <line x1="116" y1="357" x2="116" y2="392" stroke="#d97706" stroke-width="1.7" marker-end="url(#aw)"/>
+        <line x1="340" y1="357" x2="340" y2="392" stroke="#059669" stroke-width="1.7" marker-end="url(#ag)"/>
+        <line x1="564" y1="357" x2="564" y2="392" stroke="#94a3b8" stroke-width="1.7" stroke-dasharray="4 3" marker-end="url(#agr)"/>
+        <text x="574" y="378" font-size="9.5" fill="#94a3b8">heartbeat</text>
+
+        <!-- Row C: delivery -->
+        <rect x="16" y="394" width="200" height="58" rx="8" fill="#fff" stroke="#cbd5e1"/>
+        <text x="116" y="414" text-anchor="middle" font-size="13.5" font-weight="600" fill="#0f172a">Telnyx</text>
+        <text x="116" y="429" text-anchor="middle" font-size="10.5" fill="#475569">carrier-registered SMS</text>
+        <text x="116" y="444" text-anchor="middle" font-size="9.5" fill="#94a3b8">10DLC ✓ kyletechcorner.com</text>
+
+        <rect x="240" y="394" width="200" height="58" rx="8" fill="#fff" stroke="#cbd5e1"/>
+        <text x="340" y="417" text-anchor="middle" font-size="13.5" font-weight="600" fill="#0f172a">Pushover</text>
+        <text x="340" y="433" text-anchor="middle" font-size="10.5" fill="#475569">phone push alerts</text>
+
+        <rect x="464" y="394" width="200" height="58" rx="8" fill="#fff" stroke="#cbd5e1"/>
+        <text x="564" y="417" text-anchor="middle" font-size="13.5" font-weight="600" fill="#0f172a">healthchecks.io</text>
+        <text x="564" y="433" text-anchor="middle" font-size="10.5" fill="#475569">dead-man's-switch</text>
+
+        <line x1="462" y1="423" x2="442" y2="423" stroke="#dc2626" stroke-width="1.7" marker-end="url(#ar)"/>
+        <text x="452" y="410" text-anchor="middle" font-size="9" fill="#dc2626">no ping = DOWN</text>
+
+        <line x1="116" y1="454" x2="116" y2="500" stroke="#d97706" stroke-width="1.7" marker-end="url(#aw)"/>
+        <line x1="340" y1="454" x2="340" y2="500" stroke="#059669" stroke-width="1.7" marker-end="url(#ag)"/>
+
+        <!-- Row D: phones -->
+        <rect x="16" y="502" width="200" height="46" rx="8" fill="#fff" stroke="#cbd5e1"/>
+        <text x="116" y="524" text-anchor="middle" font-size="13" font-weight="600" fill="#0f172a">📱 Phones</text>
+        <text x="116" y="540" text-anchor="middle" font-size="10.5" fill="#475569">SMS alerts</text>
+
+        <rect x="240" y="502" width="200" height="46" rx="8" fill="#fff" stroke="#cbd5e1"/>
+        <text x="340" y="524" text-anchor="middle" font-size="13" font-weight="600" fill="#0f172a">📱 Phone</text>
+        <text x="340" y="540" text-anchor="middle" font-size="10.5" fill="#475569">Pushover app</text>
+
+        <!-- legend -->
+        <line x1="40" y1="578" x2="62" y2="578" stroke="#0891b2" stroke-width="2.5"/>
+        <text x="68" y="582" font-size="11" fill="#475569">Weather data</text>
+        <line x1="178" y1="578" x2="200" y2="578" stroke="#059669" stroke-width="2.5"/>
+        <text x="206" y="582" font-size="11" fill="#475569">Push</text>
+        <line x1="270" y1="578" x2="292" y2="578" stroke="#d97706" stroke-width="2.5"/>
+        <text x="298" y="582" font-size="11" fill="#475569">SMS</text>
+        <line x1="360" y1="578" x2="382" y2="578" stroke="#dc2626" stroke-width="2.5"/>
+        <text x="388" y="582" font-size="11" fill="#475569">Down alert</text>
+      </svg>
+      <div class="legend-row" style="margin-top:14px">
+        <span><i style="background:#0891b2"></i>Weather data</span>
+        <span><i style="background:#059669"></i>Push (Pushover)</span>
+        <span><i style="background:#d97706"></i>SMS (Telnyx)</span>
+        <span><i style="background:#dc2626"></i>Down alert</span>
+      </div>
+    </div>
+
+    <h2>How it works</h2>
+    <p>The whole thing follows one idea: <strong>a small home server can run real, reliable
+    automation</strong> without a cloud bill or a rack of gear. Each piece does one job.</p>
+
+    <div class="grid" style="margin-top:18px">
+      <div class="card">
+        <div class="ico">⛈️</div>
+        <h3>Weather alerting</h3>
+        <p>Polls the free National Weather Service API every few minutes. Severe storm and tornado
+        warnings trigger an immediate alert; hail warnings get a "move the vehicle" heads-up.</p>
+      </div>
+      <div class="card">
+        <div class="ico">🔔</div>
+        <h3>Two alert channels</h3>
+        <p>A push notification for everyday alerts, plus a carrier-registered SMS path for the loud,
+        can't-miss ones — so a warning reaches a phone even with the app closed.</p>
+      </div>
+      <div class="card">
+        <div class="ico">💓</div>
+        <h3>Dead-man's-switch</h3>
+        <p>The server can't report its own outage, so it "checks in" with an outside service every
+        5 minutes. If the check-ins stop, that service raises the alarm. The absence of a heartbeat
+        <em>is</em> the alert.</p>
+      </div>
+      <div class="card">
+        <div class="ico">📊</div>
+        <h3>Local dashboard</h3>
+        <p>A zero-dependency web dashboard shows live status, current alerts, a radar map, and
+        settings — served on the home network only, no ports opened to the internet.</p>
+      </div>
+      <div class="card">
+        <div class="ico">💸</div>
+        <h3>Self-monitoring</h3>
+        <p>It even watches its own running costs — a daily check warns if the SMS balance is
+        getting low, so alerts never quietly stop working.</p>
+      </div>
+      <div class="card">
+        <div class="ico">🧰</div>
+        <h3>Simple by design</h3>
+        <p>Plain Python and shell scripts, scheduled by the OS. Nothing exotic, nothing to babysit —
+        the kind of build you can read end-to-end in an afternoon.</p>
+      </div>
+    </div>
+
+    <p style="margin-top:26px">Build logs and walkthroughs for projects like this go up on
+    <a href="https://www.youtube.com/@KyleTechCorner" target="_blank" rel="noopener">YouTube — @KyleTechCorner</a>.</p>
+  </div>
+</div>
+
+<footer class="site">
+  <div class="wrap row">
+    <div>© 2026 Kyle Tech Corner</div>
+    <div class="links">
+      <a href="homelab.html">Homelab</a>
+      <a href="privacy.html">Privacy</a>
+      <a href="notifications.html">SMS Terms</a>
+    </div>
+  </div>
+</footer>
+
+</body>
+</html>
