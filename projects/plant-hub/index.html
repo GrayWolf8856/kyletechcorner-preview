@@ -1,0 +1,150 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta name="robots" content="noindex,nofollow">
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Plant Hub — Open-Source ESP32 Plant Watering PCB | Kyle Tech Corner</title>
+<meta name="description" content="Plant Hub v1.0: an open-source ESP32-C3 plant watering controller PCB. Full KiCad design files, Gerbers, BOM, and build log — free to download and build.">
+<link rel="stylesheet" href="../../style.css">
+<style>
+  .shots{display:grid;grid-template-columns:repeat(auto-fit,minmax(300px,1fr));gap:20px;margin:26px 0}
+  .shots figure{margin:0;background:var(--bg);border:1px solid var(--line);border-radius:14px;padding:12px;box-shadow:0 1px 2px rgba(15,23,42,.04)}
+  .shots img{width:100%;height:auto;border-radius:8px;display:block}
+  .shots figcaption{color:var(--ink-soft);font-size:.88rem;padding:10px 4px 2px;text-align:center}
+  .dl{display:flex;align-items:baseline;gap:10px;flex-wrap:wrap}
+  .dl .size{color:var(--ink-soft);font-size:.85rem}
+  .log{list-style:none;padding:0;margin:0}
+  .log li{border-left:3px solid var(--brand);padding:4px 0 4px 16px;margin:0 0 16px}
+  .log .date{color:var(--ink-soft);font-size:.85rem;font-weight:600;text-transform:uppercase;letter-spacing:.4px}
+  .specs td{padding:6px 14px 6px 0;vertical-align:top;color:#293548}
+  .specs td:first-child{font-weight:600;color:var(--ink);white-space:nowrap}
+</style>
+</head>
+<body>
+
+<header class="site">
+  <div class="wrap nav">
+    <a class="brand" href="../../index.html"><span class="logo">KT</span>Kyle&nbsp;Tech&nbsp;<span class="tag">Corner</span></a>
+        <nav class="links">
+      <a href="../../index.html">Home</a>
+      <a href="../../about.html">About</a>
+      <a href="../../homelab.html">Homelab</a>
+      <a href="index.html">Projects</a>
+      <a class="yt" href="https://www.youtube.com/@KyleTechCorner" target="_blank" rel="noopener">YouTube</a>
+    </nav>
+  </div>
+</header>
+
+<div class="page wrap">
+  <span class="tag-pill">Open-Source Hardware Project</span>
+  <h1>Plant Hub v1.0</h1>
+  <p class="meta">An ESP32-C3 plant watering controller PCB — designed, verified, and sent to fab. MIT licensed: download it, build it, remix it.</p>
+
+  <div class="shots">
+    <figure>
+      <img src="img/render-iso.png" alt="3D render of the assembled Plant Hub v1.0 PCB, isometric view">
+      <figcaption>Plant Hub v1.0 — 3D render of the finished board</figcaption>
+    </figure>
+    <figure>
+      <img src="img/render-top.png" alt="3D render of the Plant Hub v1.0 PCB, top view showing silkscreen labels">
+      <figcaption>Top view — every connector and pin labeled on the silkscreen</figcaption>
+    </figure>
+  </div>
+
+  <div class="prose">
+    <h2>What it does</h2>
+    <p>One small board waters a plant and runs its lights. A socketed
+    <strong>ESP32-C3 Super Mini</strong> switches two independent 5V LED strip channels
+    (white + grow) through logic-level MOSFETs, drives a water pump through a plug-in
+    5V relay module, and reads an analog soil-moisture sensor on a WiFi-safe ADC pin.
+    Everything lands on screw terminals — no flying wires, no breadboard.</p>
+
+    <table class="specs">
+      <tr><td>Board</td><td>85 × 60 mm, 2-layer, ground pour both sides</td></tr>
+      <tr><td>Brain</td><td>ESP32-C3 Super Mini (socketed &amp; removable, USB-C reachable in place)</td></tr>
+      <tr><td>Outputs</td><td>2× LED channels (RFP30N06LE MOSFETs), 1× pump via relay module</td></tr>
+      <tr><td>Input</td><td>Analog soil-moisture sensor, 3.3V, on ADC1 (works with WiFi on)</td></tr>
+      <tr><td>Power</td><td>Single 5V input on a screw terminal</td></tr>
+      <tr><td>Firmware pins</td><td>IO6 = white, IO7 = pump (HIGH = on), IO10 = grow, IO0 = soil</td></tr>
+    </table>
+
+    <h2>Build log</h2>
+    <ul class="log">
+      <li>
+        <div class="date">July 2026 — Breadboard to PCB</div>
+        The circuit started life validated on a breadboard, then got turned into a real
+        schematic and board in KiCad. The whole design is <em>generated from a single
+        netlist file</em>, so the schematic and PCB can never disagree with each other.
+      </li>
+      <li>
+        <div class="date">July 2026 — Verification pays off</div>
+        A pre-order design review caught a board-killer: the ESP32 socket footprint had its
+        two pin columns mirrored. Plugging in the module would have put 5V into a GPIO pin.
+        Cross-checking the footprint against photos of the real module caught it before
+        ordering — the fix, plus a pump-gate pulldown and a ground-pour repair, all went in
+        before a single board was made. Lesson for first-time designers: verify footprints
+        against the physical part, not your memory.
+      </li>
+      <li>
+        <div class="date">July 2026 — Sent to fab</div>
+        Final design passed ERC and DRC with zero errors and zero unconnected nets at
+        JLCPCB's design rules. Boards and parts are ordered — assembly and firmware are next.
+      </li>
+    </ul>
+
+    <h2>Downloads</h2>
+    <p>Everything you need to make this board yourself, MIT licensed
+    (<a href="LICENSE">license</a>):</p>
+    <div class="grid" style="margin:18px 0 8px">
+      <div class="card">
+        <div class="ico">🏭</div>
+        <h3>Gerbers (fab-ready)</h3>
+        <p class="dl"><a href="files/plant-hub-v1.0.zip">plant-hub-v1.0.zip</a>
+        <span class="size">~94 KB</span></p>
+        <p>Upload straight to JLCPCB or PCBWay. 2 layers, 1.6mm, any color you like.</p>
+      </div>
+      <div class="card">
+        <div class="ico">📋</div>
+        <h3>Bill of materials</h3>
+        <p class="dl"><a href="files/plant-hub-v1.0-BOM.csv">plant-hub-v1.0-BOM.csv</a>
+        <span class="size">~2 KB</span></p>
+        <p>Every part with reference designators and quantities. All hand-solderable.</p>
+      </div>
+      <div class="card">
+        <div class="ico">📐</div>
+        <h3>Schematic (PDF)</h3>
+        <p class="dl"><a href="files/plant-hub-v1.0-schematic.pdf">plant-hub-v1.0-schematic.pdf</a>
+        <span class="size">~70 KB</span></p>
+        <p>The full circuit on one page, with design notes on the sheet.</p>
+      </div>
+      <div class="card">
+        <div class="ico">🧰</div>
+        <h3>KiCad source</h3>
+        <p class="dl"><a href="https://github.com/GrayWolf8856/kyletechcorner-preview/tree/main/projects/plant-hub/hardware" target="_blank" rel="noopener">hardware/ on GitHub</a></p>
+        <p>Complete KiCad 10 project, custom ESP32-C3 socket footprint, the netlist-driven
+        generator scripts, and the assembly guide (<a href="https://github.com/GrayWolf8856/kyletechcorner-preview/blob/main/projects/plant-hub/hardware/README.md" target="_blank" rel="noopener">README</a>).</p>
+      </div>
+    </div>
+
+    <h2>Status</h2>
+    <div class="highlight">
+      <strong>Current stage:</strong> PCBs and components ordered (July 2026). Next up:
+      assembly, smoke test, and firmware — progress will be posted here and on
+      <a href="https://www.youtube.com/@KyleTechCorner" target="_blank" rel="noopener">the channel</a>.
+    </div>
+  </div>
+</div>
+
+<footer class="site">
+  <div class="wrap row">
+    <div>© 2026 Kyle Tech Corner</div>
+    <div class="links">
+      <a href="../../homelab.html">Homelab</a>
+      <a href="index.html">Projects</a>
+    </div>
+  </div>
+</footer>
+
+</body>
+</html>

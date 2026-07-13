@@ -1,0 +1,17 @@
+References,Qty,Value,Part,Description,Footprint
+C1,1,470u,470uF 16V radial D8 P3.5,"Bulk input cap (16V preferred, 10V acceptable)",CP_Radial_D8.0mm_P3.50mm
+C2 C3,2,100n,0805 100nF X7R,5V decoupling at U1,C_0805_2012Metric_Pad1.18x1.45mm_HandSolder
+D1,1,GREEN,LED 3mm green,Power indicator,LED_D3.0mm
+J1,1,5V_IN,Screw terminal 2-pos 5.08mm,"5V power input (1=+5V, 2=GND)","TerminalBlock_Phoenix_MKDS-1,5-2-5.08_1x02_P5.08mm_Horizontal"
+J2,1,LED_OUT,Screw terminal 3-pos 3.5mm,"LED strips (1=+5V common, 2=WHITE-, 3=GROW-)","TerminalBlock_Phoenix_PT-1,5-3-3.5-H_1x03_P3.50mm_Horizontal"
+J3,1,PUMP,Screw terminal 2-pos 3.5mm,"Pump (1=switched +5V from relay NO, 2=GND)","TerminalBlock_Phoenix_PT-1,5-2-3.5-H_1x02_P3.50mm_Horizontal"
+J4,1,SOIL,Pin header 1x3 2.54mm,"Soil sensor (1=3V3, 2=GND, 3=AOUT)",PinHeader_1x03_P2.54mm_Vertical
+J5,1,RLY_CONTACT,Screw terminal 2-pos 3.5mm,"Jumpers to relay module contacts (1=+5V->COM, 2=NO return)","TerminalBlock_Phoenix_PT-1,5-2-3.5-H_1x02_P3.50mm_Horizontal"
+K1,1,RELAY_MODULE,1x4 female header 2.54mm,Socket for 5V relay module JQC-3FF-S-Z (VCC/GND/IN/NC),PinSocket_1x04_P2.54mm_Vertical
+Q1 Q2,2,RFP30N06LE,RFP30N06LE,"White LED low-side switch, logic-level NMOS",TO-220-3_Vertical
+Q3,1,2N7000,2N7000,Relay-IN inverter (HIGH on GPIO7 = pump ON),TO-92_Inline
+R1 R3,2,220,0805 220R 1%,Q1 gate series,R_0805_2012Metric_Pad1.20x1.40mm_HandSolder
+R2 R4 R7,3,10k,0805 10k 1%,Q1 gate pulldown - MANDATORY (boot flicker),R_0805_2012Metric_Pad1.20x1.40mm_HandSolder
+R5 R6,2,1k,0805 1k 1%,Q3 gate series,R_0805_2012Metric_Pad1.20x1.40mm_HandSolder
+U1,1,ESP32-C3 SuperMini,ESP32-C3 Super Mini + 2x female header 1x8 2.54mm,ESP32-C3 Super Mini dev board on 2x 1x8 female headers,ESP32-C3-SuperMini-Socket
+H1 H2 H3 H4,4,M3,M3 screw + standoff,Mounting hardware (grounded),MountingHole_3.2mm_M3_Pad_Via
