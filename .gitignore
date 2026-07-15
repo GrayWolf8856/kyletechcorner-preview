@@ -1,0 +1,9 @@
+# Local Claude Code settings
+.claude/
+
+# macOS
+.DS_Store
+
+# Never commit secrets
+secrets.env
+*.env

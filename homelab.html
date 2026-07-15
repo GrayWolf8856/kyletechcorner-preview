@@ -12,6 +12,11 @@
   .legend-row{display:flex;flex-wrap:wrap;gap:18px;font-size:.85rem;color:var(--ink-soft);margin-top:6px}
   .legend-row span{display:inline-flex;align-items:center;gap:7px}
   .legend-row i{width:18px;height:3px;border-radius:2px;display:inline-block}
+  .cost-table{width:100%;border-collapse:collapse;margin:18px 0;font-size:.95rem}
+  .cost-table th,.cost-table td{text-align:left;padding:10px 12px;border-bottom:1px solid var(--line)}
+  .cost-table th{color:var(--ink-soft);font-weight:600;font-size:.82rem;text-transform:uppercase;letter-spacing:.3px}
+  .cost-table td:last-child,.cost-table th:last-child{text-align:right;white-space:nowrap}
+  .cost-table tr.total td{border-top:2px solid var(--line);border-bottom:none;font-weight:700}
 </style>
 </head>
 <body>
@@ -188,6 +193,62 @@
         the kind of build you can read end-to-end in an afternoon.</p>
       </div>
     </div>
+
+    <h2>The hard part: getting registered on Telnyx</h2>
+    <p>The scripts were the easy part. Actually being <em>allowed</em> to send an automated
+    text message took about <strong>two weeks</strong> — and almost none of that time was spent
+    writing code.</p>
+
+    <p>In the US, every application-to-person (A2P) sender has to clear <strong>10DLC
+    registration</strong> first: you register a <em>brand</em> (who you are) and a <em>campaign</em>
+    (what you'll send and why), and both get vetted by The Campaign Registry and the mobile carriers
+    before a single message is allowed through. Two things stretched it out:</p>
+
+    <div class="grid" style="margin-top:18px">
+      <div class="card">
+        <div class="ico">🐢</div>
+        <h3>Carrier vetting is slow</h3>
+        <p>Once the brand and campaign are submitted, approval is out of your hands — it sits in a
+        review queue at the registry and the carriers. There's no "hurry it up" button, so most of
+        the two weeks was simply waiting on statuses to flip from <em>pending</em> to <em>approved</em>.</p>
+      </div>
+      <div class="card">
+        <div class="ico">📝</div>
+        <h3>Opt-in &amp; website requirements</h3>
+        <p>To qualify, the campaign has to point at a real site with clear consent language — so
+        this site needed a published
+        <a href="notifications.html">SMS Terms</a> page and a
+        <a href="privacy.html">Privacy Policy</a> describing exactly how opt-in works. Those pages
+        (still linked in the footer below) exist <em>because</em> 10DLC required them.</p>
+      </div>
+    </div>
+
+    <h2>What it costs</h2>
+    <div class="highlight">
+      <strong>Bottom line:</strong> roughly <strong>$15–20 one-time</strong> to get registered and
+      live, then <strong>$0.0085 per text segment</strong> after that. A whole year of storm and
+      hail alerts costs about the price of a coffee.
+    </div>
+
+    <table class="cost-table">
+      <thead>
+        <tr><th>Item</th><th>Cost</th></tr>
+      </thead>
+      <tbody>
+        <tr><td>10DLC brand registration (one-time)</td><td>~$4</td></tr>
+        <tr><td>Campaign registration + carrier vetting</td><td>~$10 + small monthly</td></tr>
+        <tr><td>Phone number</td><td>~$1 / month</td></tr>
+        <tr><td>Initial SMS balance funded</td><td>~$10</td></tr>
+        <tr class="total"><td>Per text sent</td><td>$0.0085 / segment</td></tr>
+      </tbody>
+    </table>
+
+    <p class="lede" style="font-size:.9rem">A "segment" is up to 160 characters; a longer alert just
+    splits into a few segments, so even a wordy warning costs a fraction of a cent. The lab funds a
+    small prepaid balance and a daily <code>balance_check.py</code> job pushes a heads-up if it ever
+    drops below $5 — so the alerts never quietly run out of money. Setup figures are approximate
+    (10DLC pass-through fees shift over time); the per-segment rate is the actual value the scripts
+    bill against.</p>
 
     <p style="margin-top:26px">Build logs and walkthroughs for projects like this go up on
     <a href="https://www.youtube.com/@KyleTechCorner" target="_blank" rel="noopener">YouTube — @KyleTechCorner</a>.</p>
